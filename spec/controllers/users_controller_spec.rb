@@ -285,6 +285,11 @@ describe UsersController do
       
       before(:each) do
         @user = Factory(:user, :email => "asd@asd.com")
+        first = Factory(:user, :email => "asd1@asd.com")
+        second = Factory(:user, :email => "asd2@asd.com")
+        third = Factory(:user, :email => "asd3@asd.com")
+        
+        @users = [first, second, third]
       end
       
       describe "as a non-signed-in user" do
@@ -300,6 +305,13 @@ describe UsersController do
           delete :destroy, :id => @user
           response.should redirect_to(root_path)
         end
+        it "should not show the delete link" do
+          test_sign_in(@user)
+          get :index
+          @users[0..2].each do |user|
+            response.should_not have_tag("a", "delete")
+          end
+        end
       end
       
       describe "as an admin user" do
@@ -314,6 +326,11 @@ describe UsersController do
         it "should destroy the user" do
           delete :destroy, :id => @user
           response.should redirect_to(users_path)
+        end
+        
+        it "should show the delete link" do
+          get :index
+          response.should have_tag("title", /all users/i)
         end
       end
     end
